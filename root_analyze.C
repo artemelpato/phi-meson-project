@@ -1,24 +1,12 @@
 #include <TTree.h>
 #include <TFile.h>
-#include <vector>
 #include <cmath>
-#include <fstream>
 #include <TH1D.h>
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 
-struct particleData 
-{
-	double E;
-	double p_x;
-	double p_y;
-	double p_z;
-	int    nEvent;
-};
-
 int root_analyze()
 {
-	int iEvent = 0;
 
 	TFile *inFile  = new TFile("tree_out.root", "READ");
 	TFile *outFile = new TFile("hist_out.root", "RECREATE");
@@ -45,16 +33,17 @@ int root_analyze()
 		KMinusTreeReader->Restart();
 		while (KMinusTreeReader->Next()){
 			if (*KPlusNEvent == *KMinusNEvent){
-				massHist->Fill(1000 * sqrt( (*KPlusE  + *KMinusE )*(*KPlusE   + *KMinusE )
+				massHist->Fill(1000 * sqrt( (*KPlusE  + *KMinusE )*(*KPlusE   + *KMinusE)
 							  - (*KPluspx + *KMinuspx)*(*KPluspx + *KMinuspx)
 							  - (*KPluspy + *KMinuspy)*(*KPluspy + *KMinuspy)
 							  - (*KPluspz + *KMinuspz)*(*KPluspz + *KMinuspz) ) );
 				continue;
 			}		
+
 			bgHist->Fill(1000 * sqrt( (*KPlusE  + *KMinusE )*(*KPlusE   + *KMinusE )
-						  - (*KPluspx + *KMinuspx)*(*KPluspx + *KMinuspx)
-						  - (*KPluspy + *KMinuspy)*(*KPluspy + *KMinuspy)
-						  - (*KPluspz + *KMinuspz)*(*KPluspz + *KMinuspz) ) );
+					        - (*KPluspx + *KMinuspx)*(*KPluspx + *KMinuspx)
+                              	                - (*KPluspy + *KMinuspy)*(*KPluspy + *KMinuspy)
+					        - (*KPluspz + *KMinuspz)*(*KPluspz + *KMinuspz) ) );
 
 		}
 	}
@@ -62,16 +51,6 @@ int root_analyze()
 		
 	massHist->Write();	
 	bgHist  ->Write();
-
-	massHist->Scale(2/massHist->Integral());
-	bgHist   ->Scale(1/bgHist->Integral());
-
-	TH1D *peakHist = (TH1D*) massHist->Clone();
-	peakHist->Add(bgHist, -1);
-
-	peakHist->SetName("peak_hist");
-
-	peakHist->Write();
 
 	inFile ->Close();
 	outFile->Close();
